@@ -237,45 +237,6 @@ The code architecture allows easy migration:
 
 ---
 
-## Interview Value
-
-### What This Project Demonstrates
-
-- ✅ Understanding of microservices architecture
-- ✅ Knowing WHEN to use sync vs async communication
-- ✅ gRPC implementation with strong typing
-- ✅ Event-driven architecture patterns
-- ✅ Idempotency and retry handling
-- ✅ Clean code organization
-
-### Key Talking Points
-
-> "I chose gRPC for payment because we need synchronous confirmation before telling the user their order is complete."
-
-> "Notifications are asynchronous because they don't need to block the main flow. If email fails, we can retry without affecting the user experience."
-
-> "The message broker simulates SQS/SNS patterns locally. In production, we'd replace the in-memory implementation with actual AWS SDK calls, but the architecture stays the same."
-
-### Common Interview Questions
-
-See [docs/interview-prep.md](docs/interview-prep.md) for:
-- 10+ common questions with ideal answers
-- Pitch scripts (30s, 1min, 2min)
-- How to discuss this project
-- Red flags to avoid
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [concepts.md](docs/concepts.md) | Deep dive into microservices, gRPC, messaging |
-| [architecture.md](docs/architecture.md) | System design with diagrams |
-| [interview-prep.md](docs/interview-prep.md) | Interview questions and answers |
-
----
-
 ## License
 
 MIT License - Use freely for learning and portfolio.
