@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "github.com/Tiago-De-Liz/go-microservices-grpc-messaging/proto/order";
+
+// Order represents an order in the system
+// These messages are used for events, not RPC
+message Order {
+  // Unique order identifier
+  string id = 1;
+  
+  // Customer identifier
+  string customer_id = 2;
+  
+  // Customer email
+  string customer_email = 3;
+  
+  // Items in the order
+  repeated OrderItem items = 4;
+  
+  // Total amount in cents
+  int64 total_cents = 5;
+  
+  // Currency code
+  string currency = 6;
+  
+  // Current order status
+  OrderStatus status = 7;
+  
+  // Payment transaction ID (if paid)
+  string payment_transaction_id = 8;
+  
+  // Timestamps
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+// OrderItem represents a single item in an order
+message OrderItem {
+  string product_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+  int64 unit_price_cents = 4;
+}
+
+// OrderStatus enum for order states
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_PENDING = 1;
+  ORDER_STATUS_PAID = 2;
+  ORDER_STATUS_PROCESSING = 3;
+  ORDER_STATUS_SHIPPED = 4;
+  ORDER_STATUS_DELIVERED = 5;
+  ORDER_STATUS_CANCELLED = 6;
+}
+
+// OrderCreatedEvent is published when a new order is created
+// This is the main event that triggers downstream processing
+message OrderCreatedEvent {
+  // Event metadata
+  string event_id = 1;
+  string event_type = 2; // "order.created"
+  string timestamp = 3;
+  
+  // Order data
+  Order order = 4;
+}
+
+// OrderPaidEvent is published when payment is confirmed
+message OrderPaidEvent {
+  string event_id = 1;
+  string event_type = 2; // "order.paid"
+  string timestamp = 3;
+  
+  string order_id = 4;
+  string transaction_id = 5;
+  int64 amount_cents = 6;
+}
+
+// OrderCancelledEvent is published when an order is cancelled
+message OrderCancelledEvent {
+  string event_id = 1;
+  string event_type = 2; // "order.cancelled"
+  string timestamp = 3;
+  
+  string order_id = 4;
+  string reason = 5;
+}

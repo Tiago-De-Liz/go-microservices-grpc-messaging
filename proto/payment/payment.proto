@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package payment;
+
+option go_package = "github.com/Tiago-De-Liz/go-microservices-grpc-messaging/proto/payment";
+
+// PaymentService handles payment processing
+// This is a synchronous RPC service - the caller waits for the response
+service PaymentService {
+  // ProcessPayment processes a payment for an order
+  // Returns immediately with success/failure status
+  rpc ProcessPayment(PaymentRequest) returns (PaymentResponse);
+  
+  // GetPaymentStatus retrieves the status of a previous payment
+  rpc GetPaymentStatus(PaymentStatusRequest) returns (PaymentStatusResponse);
+}
+
+// PaymentRequest contains the data needed to process a payment
+message PaymentRequest {
+  // Unique identifier for this payment request (for idempotency)
+  string idempotency_key = 1;
+  
+  // Order ID this payment is for
+  string order_id = 2;
+  
+  // Amount to charge (in cents to avoid floating point issues)
+  int64 amount_cents = 3;
+  
+  // Currency code (e.g., "BRL", "USD")
+  string currency = 4;
+  
+  // Customer email for receipts
+  string customer_email = 5;
+  
+  // Optional: Payment method (for simulation)
+  string payment_method = 6;
+}
+
+// PaymentResponse contains the result of a payment processing
+message PaymentResponse {
+  // Whether the payment was successful
+  bool success = 1;
+  
+  // Unique transaction ID (if successful)
+  string transaction_id = 2;
+  
+  // Error code (if failed)
+  PaymentErrorCode error_code = 3;
+  
+  // Human-readable error message (if failed)
+  string error_message = 4;
+  
+  // Timestamp when payment was processed
+  string processed_at = 5;
+}
+
+// PaymentStatusRequest for querying payment status
+message PaymentStatusRequest {
+  string transaction_id = 1;
+}
+
+// PaymentStatusResponse with payment details
+message PaymentStatusResponse {
+  string transaction_id = 1;
+  string order_id = 2;
+  int64 amount_cents = 3;
+  string currency = 4;
+  PaymentStatus status = 5;
+  string created_at = 6;
+}
+
+// PaymentStatus enum for payment states
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_STATUS_PENDING = 1;
+  PAYMENT_STATUS_COMPLETED = 2;
+  PAYMENT_STATUS_FAILED = 3;
+  PAYMENT_STATUS_REFUNDED = 4;
+}
+
+// PaymentErrorCode enum for specific error types
+enum PaymentErrorCode {
+  PAYMENT_ERROR_CODE_UNSPECIFIED = 0;
+  PAYMENT_ERROR_CODE_INSUFFICIENT_FUNDS = 1;
+  PAYMENT_ERROR_CODE_INVALID_CARD = 2;
+  PAYMENT_ERROR_CODE_LIMIT_EXCEEDED = 3;
+  PAYMENT_ERROR_CODE_PROCESSING_ERROR = 4;
+  PAYMENT_ERROR_CODE_DUPLICATE_REQUEST = 5;
+}
