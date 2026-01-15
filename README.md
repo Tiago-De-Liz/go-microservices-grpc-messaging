@@ -12,8 +12,6 @@ Educational project demonstrating microservices architecture in Go with synchron
 - [Project Structure](#project-structure)
 - [Communication Patterns](#communication-patterns)
 - [AWS Mapping](#aws-mapping)
-- [Interview Value](#interview-value)
-- [Documentation](#documentation)
 
 ---
 
@@ -125,20 +123,136 @@ curl -X POST http://localhost:8080/orders \
 
 **Check the logs to see the complete flow!**
 
-### Other Endpoints
+---
+
+## API Reference
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/orders` | Create a new order |
+| `GET` | `/orders` | List all orders |
+| `GET` | `/orders/{id}` | Get order by ID |
+| `GET` | `/health` | Health check |
+| `GET` | `/stats` | Service statistics |
+
+### Create Order
 
 ```bash
-# List all orders
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer_email": "user@example.com",
+    "items": [
+      {
+        "product_name": "Laptop Pro",
+        "quantity": 1,
+        "unit_price_cents": 249900
+      }
+    ]
+  }'
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": "ord_abc123",
+  "customer_email": "user@example.com",
+  "items": [...],
+  "total_cents": 249900,
+  "status": 2,
+  "payment_transaction_id": "tx_def456"
+}
+```
+
+### Create Order with Multiple Items
+
+```bash
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer_email": "client@example.com",
+    "items": [
+      {"product_name": "Laptop", "quantity": 1, "unit_price_cents": 350000},
+      {"product_name": "Mouse", "quantity": 2, "unit_price_cents": 15000}
+    ]
+  }'
+```
+
+### List All Orders
+
+```bash
 curl http://localhost:8080/orders
+```
 
-# Get specific order
+**Response:**
+```json
+{
+  "orders": [...],
+  "count": 3
+}
+```
+
+### Get Order by ID
+
+```bash
 curl http://localhost:8080/orders/ord_abc123
+```
 
-# Health check
+### Health Check
+
+```bash
 curl http://localhost:8080/health
+```
 
-# Service statistics
+**Response:**
+```json
+{
+  "status": "healthy",
+  "service": "order"
+}
+```
+
+### Service Statistics
+
+```bash
 curl http://localhost:8080/stats
+```
+
+**Response:**
+```json
+{
+  "TotalOrders": 5,
+  "PaidOrders": 4,
+  "CancelledOrders": 1,
+  "PendingOrders": 0,
+  "TotalRevenueCents": 899800
+}
+```
+
+### Test Scenarios
+
+```bash
+# ✅ Successful payment
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{"customer_email":"test@example.com","items":[{"product_name":"Book","quantity":1,"unit_price_cents":5000}]}'
+
+# ❌ Payment declined (amounts ending in 99 cents are simulated as declined)
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{"customer_email":"test@example.com","items":[{"product_name":"Test","quantity":1,"unit_price_cents":199}]}'
+
+# ❌ Missing email validation error
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{"items":[{"product_name":"Test","quantity":1,"unit_price_cents":1000}]}'
+
+# ❌ Empty items validation error
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{"customer_email":"test@example.com","items":[]}'
 ```
 
 ---
